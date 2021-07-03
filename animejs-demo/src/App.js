@@ -1,23 +1,22 @@
-import logo from './logo.svg';
 import './App.css';
+import CasecadingList from './components/react-anime';
+import MovingLetters from './components/moving-letters';
+import Dulations from './components/duration';
 
+// MAIN REF: https://github.com/juliangarnier/anime
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <p><h2>LIB: react-anime</h2></p>
+      <CasecadingList />
+      <hr />
+      <hr />
+      <MovingLetters />
+      <hr />
+      <hr />
+      <Dulations />
+      <hr />
+      <hr />
     </div>
   );
 }
