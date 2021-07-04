@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
+import { MTLLoader, OBJLoader } from 'three-obj-mtl-loader';
 
 class SecondDemo extends Component {
   componentDidMount() {
@@ -36,11 +37,40 @@ class SecondDemo extends Component {
     const axesHelper = new THREE.AxesHelper(10);
     this.scene.add(axesHelper);
 
+    //Loading 3d Models
+    this.loadStaticObjectFile();
+
     //ADD Your 3D Models here
     this.renderScene();
 
     //start animation
     this.start();
+  }
+
+  loadStaticObjectFile() {
+    var mtlLoader = new MTLLoader();
+    mtlLoader.setBaseUrl("./assets/");
+    mtlLoader.load("Handgun_obj.mtl", materials => {
+      materials.preload();
+      console.log("Material loaded", materials);
+      //Load Object Now and Set Material
+      var objLoader = new OBJLoader();
+      objLoader.setMaterials(materials);
+      objLoader.load("./assets/Handgun_obj.obj",
+        object => {
+          this.freedomMesh = object;
+          this.freedomMesh.position.setY(3); //or  this
+          // this.freedomMesh.scale.set(0.02, 0.02, 0.02);
+          this.scene.add(this.freedomMesh);
+        },
+        xhr => {
+          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        },
+        // called when loading has errors
+        error => {
+          console.log("An error happened" + error);
+        });
+    });
   }
 
   createCamera = (width, height) => {
@@ -107,7 +137,7 @@ class SecondDemo extends Component {
     //ReDraw Scene with Camera and Scene Object
 
     //Rotate Models
-    if (this.cube) this.cube.rotation.y += 0.01;
+    // if (this.cube) this.cube.rotation.y += 0.01;
 
     this.renderScene();
     this.frameId = window.requestAnimationFrame(this.animate);
