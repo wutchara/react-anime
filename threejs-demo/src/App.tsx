@@ -9,6 +9,7 @@ import {
 // import FirstDemo from './components/first-demo';
 import SecondDemo from './components/second-demo';
 import ThridDemo from './components/third-demo';
+import Responsive from './components/responsive';
 
 import './App.css';
 
@@ -23,7 +24,7 @@ function App() {
           <Link to="/about">About</Link>
         </li>
         <li>
-          <Link to="/responsive">Responsive</Link>
+          <Link to="/responsive">Responsive - doesn't work</Link>
         </li>
       </ul>
       <Switch>
@@ -31,7 +32,7 @@ function App() {
           <About />
         </Route>
         <Route path="/responsive">
-          <Responsive />
+          <ResponsiveCaller />
         </Route>
         <Route path="/">
           <Home />
@@ -62,8 +63,8 @@ function About() {
   return <h2>About</h2>;
 }
 
-function Responsive() {
-  return <h2>Responsive</h2>;
+function ResponsiveCaller() {
+  return <Responsive />;
 }
 
 export default App;
