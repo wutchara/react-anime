@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Three.js - Tank</title>
+    <title>Three.js - Tank - 2</title>
     <style>
       html, body {
         height: 100%;
@@ -36,10 +36,12 @@
 // from https://threejsfundamentals.org/threejs/threejs-responsive.html
 
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/build/three.module.js';
+import {GUI} from 'https://threejsfundamentals.org/3rdparty/dat.gui.module.js';
 
 function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas: canvas});
+  const gui = new GUI();
   renderer.setClearColor(0xAAAAAA);
   renderer.shadowMap.enabled = true;
 
@@ -89,9 +91,10 @@ function main() {
   const carWidth = 4;
   const carHeight = 1;
   const carLength = 8;
-
   const tank = new THREE.Object3D();
   scene.add(tank);
+
+
 
   const bodyGeometry = new THREE.BoxGeometry(carWidth, carHeight, carLength);
   const bodyMaterial = new THREE.MeshPhongMaterial({color: 0x6688AA});
@@ -109,7 +112,7 @@ function main() {
 
   const wheelRadius = 1;
   const wheelThickness = .5;
-  const wheelSegments = 6;
+  const wheelSegments = 10;
   const wheelGeometry = new THREE.CylinderGeometry(
       wheelRadius,     // top radius
       wheelRadius,     // bottom radius
@@ -124,6 +127,7 @@ function main() {
     [-carWidth / 2 - wheelThickness / 2, -carHeight / 2, -carLength / 3],
     [ carWidth / 2 + wheelThickness / 2, -carHeight / 2, -carLength / 3],
   ];
+
   const wheelMeshes = wheelPositions.map((position) => {
     const mesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
     mesh.position.set(...position);
@@ -210,17 +214,6 @@ function main() {
   splineObject.position.y = 0.05;
   scene.add(splineObject);
 
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-    }
-    return needResize;
-  }
-
   const targetPosition = new THREE.Vector3();
   const tankPosition = new THREE.Vector2();
   const tankTarget = new THREE.Vector2();
@@ -231,8 +224,58 @@ function main() {
     { cam: targetCamera, desc: 'near target looking at tank', },
     { cam: tankCamera, desc: 'above back of tank', },
   ];
-
   const infoElem = document.querySelector('#info');
+
+  // Turns both axes and grid visible on/off
+  // GUI requires a property that returns a bool
+  // to decide to make a checkbox so we make a setter
+  // can getter for `visible` which we can tell GUI
+  // to look at.
+  class AxisGridHelper {
+    constructor(node, units = 10) {
+      const axes = new THREE.AxesHelper();
+      axes.material.depthTest = false;
+      axes.renderOrder = 2;  // after the grid
+      node.add(axes);
+
+      const grid = new THREE.GridHelper(units, units);
+      grid.material.depthTest = false;
+      grid.renderOrder = 1;
+      node.add(grid);
+
+      this.grid = grid;
+      this.axes = axes;
+      this.visible = true; // TODO: set to be false
+    }
+    get visible() {
+      return this._visible;
+    }
+    set visible(v) {
+      this._visible = v;
+      this.grid.visible = v;
+      this.axes.visible = v;
+    }
+  }
+
+  // add an AxesHelper to each node
+  function makeAxisGrid(node, label, units) {
+    const helper = new AxisGridHelper(node, units);
+    gui.add(helper, 'visible').name(label);
+  }
+  makeAxisGrid(scene, 'scene', 50);
+  makeAxisGrid(tank, 'tank');
+  
+
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+    return needResize;
+  }
 
   function render(time) {
     time *= 0.001;
@@ -276,10 +319,10 @@ function main() {
       obj.rotation.x = time * 3;
     });
 
-    const camera = cameras[time * .25 % cameras.length | 0];
-    infoElem.textContent = camera.desc;
+    const cameraView = cameras[time * .25 % cameras.length | 0];
+    infoElem.textContent = cameraView.desc;
 
-    renderer.render(scene, camera.cam);
+    renderer.render(scene, cameraView.cam);
 
     requestAnimationFrame(render);
   }
